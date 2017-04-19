@@ -1,0 +1,1 @@
+HUIMiner.exe -Damount2.txt -Eprice2.txt -Ooutfile.txt -N8 -W6 -#5 -S30 -U0.3
