@@ -290,7 +290,11 @@ void HUIMiner::secondReadDB()
 		for (int index = 0; index != curCounts; ++ index)
 		{
 			double iutil = curRowQuantities[index] * itemPrices[curRowItems[index]];
-			UTILITYLISTENTRY curEntry(curLineTid, iutil, curTransactionUtility - iutil);
+			UTILITYLISTENTRY curEntry(curLineTid, iutil, curTransactionUtility - iutil
+#ifdef Add_PUtil
+				, 0.0
+#endif
+				);
 			initUtilityLists[globalIndex[curRowItems[index]]]->appendEntry(&curEntry);
 			curTransactionUtility -= iutil;
 
@@ -446,17 +450,24 @@ UtilityList *HUIMiner::construct(UtilityList *pUL, UtilityList *X, UtilityList *
 			}else
 			{
 			//	k = binarySearch(pUL->itemEntries, curEntry.tid, k, pNumber);
-
+#ifdef Add_PUtil
+				curiutil = curEntry.iutil + curEntryY.iutil - curEntry.putil;
+#else
 				while (k < pNumber && pUL->itemEntries[k].tid != curEntry.tid)
 				{
 					k ++;
 				}
 
 				curiutil = curEntry.iutil + curEntryY.iutil - pUL->itemEntries[k ++].iutil;
+#endif
 
 			}
 
-			UTILITYLISTENTRY newEntry(curEntry.tid, curiutil, curEntryY.rutil);
+			UTILITYLISTENTRY newEntry(curEntry.tid, curiutil, curEntryY.rutil
+#ifdef Add_PUtil
+				, curEntry.iutil
+#endif
+				);
 //			counts ++;
 //			iutilSum += curiutil;
 

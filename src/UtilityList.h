@@ -6,9 +6,24 @@ typedef struct UtilityListEntry
 	int tid;
 	double iutil;
 	double rutil;
-	UtilityListEntry() : tid(-1), iutil(0.0), rutil(0.0){}
+#ifdef Add_PUtil
+	double putil;
+#endif
+	UtilityListEntry() : tid(-1), iutil(0.0), rutil(0.0)
+#ifdef Add_PUtil
+		, putil(0.0)
+#endif
+	{}
 
-	UtilityListEntry(int utid, double uIUtil, double uRUtil) : tid(utid), iutil(uIUtil), rutil(uRUtil){}
+	UtilityListEntry(int utid, double uIUtil, double uRUtil
+#ifdef Add_PUtil
+		, double uPUtil
+#endif
+		) : tid(utid), iutil(uIUtil), rutil(uRUtil)
+#ifdef Add_PUtil
+		, putil(uPUtil)
+#endif
+	{}
 }UTILITYLISTENTRY;
 
 
