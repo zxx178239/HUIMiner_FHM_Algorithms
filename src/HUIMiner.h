@@ -73,5 +73,7 @@ private:
 #ifdef COUNT_THE_MEMORY_DELETE
 	int newCounts;
 #endif
+
+
 };
 

@@ -43,7 +43,7 @@ public:
 	int item;
 	double sumIUtil;
 
-#ifdef NZEU
+#ifdef TKO_NZEU
 	double sumNZEU;
 #endif
 

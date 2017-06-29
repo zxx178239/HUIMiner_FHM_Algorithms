@@ -5,6 +5,8 @@
 #include <cstring>
 #include <string>
 
+int utilityListNumber = 0;
+int maxUtilityListNumber = 0;
 
 HUIMiner::HUIMiner(void) : absoluteValue(-1), relativeValue(-1), totalNum(0), 
 	itemPrices(NULL), itemTWUs(NULL), itemSupports(NULL), initUtilityLists(NULL), globalIndex(NULL), candidatesNum(0)
@@ -329,7 +331,7 @@ void HUIMiner::huiMiner(std::vector<int> &prefix, UtilityList *parent, std::vect
 	{
 		UtilityList* newParent = children[i];
 		double iutil = newParent->sumIUtil;
-#ifdef NZEU
+#ifdef TKO_NZEU
 		double nzeu = newParent->sumNZEU;
 #endif
 		double rutil = newParent->sumRUtil;
@@ -350,7 +352,7 @@ void HUIMiner::huiMiner(std::vector<int> &prefix, UtilityList *parent, std::vect
 // 		}
 		
 		// 20170418 add rutil != 0.0, it is not very useful, but I need it through analysis
-#ifdef NZEU
+#ifdef TKO_NZEU
 		if(rutil != 0.0 && nzeu + rutil >= absoluteValue)
 #else
 		if(rutil != 0.0 && iutil + rutil >= absoluteValue) 
@@ -407,8 +409,9 @@ UtilityList *HUIMiner::construct(UtilityList *pUL, UtilityList *X, UtilityList *
 	int pNumber = ((pUL == NULL) ? 0 : pUL->curCounts);
 	int index = 0, scan = 0, k = 0;
 
-
-	UtilityList *pxy = new UtilityList(Y->item, xNumber < yNumber ? xNumber : yNumber);
+	int tmpSize = xNumber < yNumber ? xNumber : yNumber;
+	UtilityList *pxy = new UtilityList(Y->item, tmpSize);
+	
 	//int counts = 0;
 	
 //	std::vector<UtilityListEntry> curAllULists;
@@ -420,7 +423,6 @@ UtilityList *HUIMiner::construct(UtilityList *pUL, UtilityList *X, UtilityList *
 // 	int yTID = curEntryY.tid;
 
 #ifdef LA_Prune
-	bool flag = false;
 	double totalUtility = X->sumIUtil + X->sumRUtil;
 #endif
 
@@ -432,16 +434,21 @@ UtilityList *HUIMiner::construct(UtilityList *pUL, UtilityList *X, UtilityList *
 			curEntryY = Y->itemEntries[++ scan];
 		}else if (curEntry.tid < curEntryY.tid)
 		{
-			curEntry = X->itemEntries[++ index];
 #ifdef LA_Prune
-			flag = false;
+			totalUtility -= (curEntry.iutil + curEntry.rutil);
+			if(totalUtility < absoluteValue)
+			{
+				delete pxy;
+				return NULL;
+			}
+
 #endif
+			curEntry = X->itemEntries[++ index];
+
 		}else
 		{
 
-#ifdef LA_Prune
-			flag = true;
-#endif
+
 			double curiutil = 0;
 
 			if (pNumber == 0)
@@ -486,17 +493,6 @@ UtilityList *HUIMiner::construct(UtilityList *pUL, UtilityList *X, UtilityList *
 
 	}
 	
-#ifdef LA_Prune
-	if (scan == yNumber && flag == false)
-	{
-		totalUtility -= (curEntry.iutil + curEntry.rutil);
-		if(totalUtility < absoluteValue)
-		{
-			delete pxy;
-			return NULL;
-		}
-	}
-#endif
 
 	if (pxy->sumIUtil == 0.0)
 	{
@@ -539,7 +535,7 @@ void HUIMiner::printResult()
 	algoName += "_LA";
 #endif
 
-#ifdef NZEU
+#ifdef TKO_NZEU
 	algoName += "_NZEU";
 #endif
 
@@ -558,6 +554,7 @@ void HUIMiner::printResult()
 		<< "dbsize\t"
 		<< "maxWidth\t"
 		<< "numItemsDistinct\t"
+		<< "memory (MB)\t"
 		<< "when_starting\n";
 
 
@@ -587,6 +584,7 @@ void HUIMiner::printResult()
 		<< transactionCounts << "\t"
 		<< transactionWeight << "\t"
 		<< itemCounts << "\t"
+		<< maxUtilityListNumber * sizeof(UTILITYLISTENTRY) / 1024.0 / 1024.0 << "\t"
 		<< tmp << "\n";
 
 
@@ -598,19 +596,19 @@ void HUIMiner::printResult()
 // {
 // 	int mid;
 // 
-// 	while (start < end)
-// 	{
-// 		mid = (start + end) / 2; 
-// 		if (curEntries[mid].tid == curTID)
-// 		{
-// 			return mid;
-// 		}else if(curEntries[mid].tid < curTID)
-// 		{
-// 			start = mid + 1;
-// 		}else
-// 		{
-// 			end = mid - 1;
-// 		}
-// 	}
+// 	while (start < end)
+// 	{
+// 		mid = (start + end) / 2; 
+// 		if (curEntries[mid].tid == curTID)
+// 		{
+// 			return mid;
+// 		}else if(curEntries[mid].tid < curTID)
+// 		{
+// 			start = mid + 1;
+// 		}else
+// 		{
+// 			end = mid - 1;
+// 		}
+// 	}
 // 	return start;
 // }

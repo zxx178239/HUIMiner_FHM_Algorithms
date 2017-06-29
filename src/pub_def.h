@@ -29,7 +29,7 @@ using namespace __gnu_cxx;
 //#define LA_Prune
 
 // the strategy for top-k Z-element, when the element is the last element, then it do not have extension
-//#define NZEU
+//#define TKO_NZEU
 
 //#define Add_PUtil
 
